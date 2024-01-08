@@ -9,3 +9,5 @@ cdk.log
 !jest.config.js
 
 .idea
+
+.env.local

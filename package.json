@@ -1,0 +1,26 @@
+{
+  "name": "engagemint-infra",
+  "version": "1.0.0",
+  "main": "main.js",
+  "license": "MPL-2.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "synth": "npx aws-cdk synth",
+    "deploy": "npx aws-cdk deploy --all --profile 'Sei'",
+    "compile": "tsc --pretty",
+    "watch": "tsc -w"
+  },
+  "engines": {
+    "node": ">=18.0"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.118.0",
+    "constructs": "^10.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

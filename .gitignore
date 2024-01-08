@@ -1,0 +1,11 @@
+*.d.ts
+*.js
+node_modules
+cdk.out
+cdk.log
+*terraform.*.tfstate*
+.gen
+.terraform
+!jest.config.js
+
+.idea

@@ -1,4 +1,4 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import {Duration, Stack, StackProps} from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as events from 'aws-cdk-lib/aws-events';
@@ -17,7 +17,8 @@ class IndexerStack extends Stack {
             runtime: lambda.Runtime.NODEJS_18_X,
             functionName: 'engagemint-indexer',
             code: lambda.Code.fromBucket(bucket, 'infra/indexer/lambda.zip'),
-            handler: 'lambda.handler',
+            handler: 'lambda/handler.handler',
+            timeout: Duration.minutes(15),
         });
 
         // Define the cron schedule - e.g., every 12 hours

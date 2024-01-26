@@ -11,3 +11,5 @@ cdk.log
 .idea
 
 .env.local
+
+tsconfig.tsbuildinfo

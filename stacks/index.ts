@@ -68,8 +68,7 @@ class EngageMintStack extends Stack {
         // Add Secrets Manager permissions
         lambdaRole.addToPolicy(new iam.PolicyStatement({
             actions: ['secretsmanager:GetSecretValue'],
-            // Replace 'your-secret-arn' with the actual ARN of the secret
-            resources: ['arn:aws:secretsmanager:region:account-id:secret:your-secret-arn'],
+            resources: ['arn:aws:secretsmanager:us-west-2:189176372795:secret:engagemint-x-credentials-KPhnTp'],
         }));
 
         // Define the Lambda function

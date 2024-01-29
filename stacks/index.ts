@@ -57,10 +57,19 @@ class EngageMintStack extends Stack {
             assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
         });
 
+        lambdaRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'));
+
         // Attach the DynamoDB access policy to the role
         lambdaRole.addToPolicy(new iam.PolicyStatement({
             actions: ['dynamodb:Query', 'dynamodb:Scan', 'dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:UpdateItem', 'dynamodb:DeleteItem'],
             resources: [registeredUsersTable.tableArn, epochLeaderboardTable.tableArn, projectConfigurationTable.tableArn],
+        }));
+
+        // Add Secrets Manager permissions
+        lambdaRole.addToPolicy(new iam.PolicyStatement({
+            actions: ['secretsmanager:GetSecretValue'],
+            // Replace 'your-secret-arn' with the actual ARN of the secret
+            resources: ['arn:aws:secretsmanager:region:account-id:secret:your-secret-arn'],
         }));
 
         // Define the Lambda function

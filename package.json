@@ -8,6 +8,7 @@
     "build": "tsc",
     "synth": "npx aws-cdk synth",
     "deploy": "npx aws-cdk deploy --all",
+    "destroy": "npx aws-cdk destroy --all",
     "compile": "tsc --pretty",
     "watch": "tsc -w"
   },

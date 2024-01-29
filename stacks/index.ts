@@ -37,7 +37,7 @@ class EngageMintStack extends Stack {
         // Create the Epoch Leaderboard Table
         const epochLeaderboardTable = new dynamodb.Table(this, 'EpochLeaderboardTable', {
             partitionKey: { name: 'ticker_epoch_composite', type: dynamodb.AttributeType.STRING },
-            sortKey: { name: 'total_points', type: dynamodb.AttributeType.NUMBER },
+            sortKey: { name: 'user_account_id', type: dynamodb.AttributeType.STRING },
             tableName: 'engagemint-epoch_leaderboard_table',
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
         });

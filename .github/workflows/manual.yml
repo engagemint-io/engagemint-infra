@@ -31,4 +31,4 @@ jobs:
           aws-region: 'us-west-2'
 
       - name: Deploy to AWS
-        run: INDEXER_GIT_HASH=${{ github.event.inputs.gitHash }} yarn deploy
+        run: INDEXER_GIT_HASH=${{ github.event.inputs.gitHash }} yarn deploy --require-approval never

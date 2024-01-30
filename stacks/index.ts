@@ -61,7 +61,7 @@ class EngageMintStack extends Stack {
 
         // Attach the DynamoDB access policy to the role
         lambdaRole.addToPolicy(new iam.PolicyStatement({
-            actions: ['dynamodb:Query', 'dynamodb:Scan', 'dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:UpdateItem', 'dynamodb:DeleteItem'],
+            actions: ['dynamodb:Query', 'dynamodb:Scan', 'dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:UpdateItem', 'dynamodb:DeleteItem', 'dynamodb:BatchWriteItem'],
             resources: [registeredUsersTable.tableArn, epochLeaderboardTable.tableArn, projectConfigurationTable.tableArn],
         }));
 

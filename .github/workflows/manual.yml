@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       indexerGitHash:
-        description: 'engagemint-indexer git commit short hash (e.g. 2e8d24d)'
-        required: true
+        description: 'Optional: engagemint-indexer git commit short hash (e.g. 2e8d24d)'
+        required: false
       apiGitHash:
-        description: 'engagemint-api git commit short hash (e.g. 2e8d24d)'
-        required: true
+        description: 'Optional: engagemint-api git commit short hash (e.g. 2e8d24d)'
+        required: false
 
 jobs:
   deploy:
@@ -33,5 +33,27 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'us-west-2'
 
+      - name: Get latest commit hash for engagemint-indexer
+        if: ${{ github.event.inputs.indexerGitHash == '' }}
+        id: get-indexer-hash
+        run: |
+          LATEST_HASH=$(curl -s https://api.github.com/repos/engagemint-io/engagemint-indexer/commits | jq -r '.[0].sha' | cut -c1-7)
+          echo "INDEXER_GIT_HASH=${LATEST_HASH}" >> $GITHUB_ENV
+
+      - name: Get latest commit hash for engagemint-api
+        if: ${{ github.event.inputs.apiGitHash == '' }}
+        id: get-api-hash
+        run: |
+          LATEST_HASH=$(curl -s https://api.github.com/repos/engagemint-io/engagemint-api/commits | jq -r '.[0].sha' | cut -c1-7)
+          echo "API_GIT_HASH=${LATEST_HASH}" >> $GITHUB_ENV
+
+      - name: Print commit hashes used
+        run: |
+          echo "Indexer Commit Hash: ${{ github.event.inputs.indexerGitHash || env.INDEXER_GIT_HASH }}"
+          echo "API Commit Hash: ${{ github.event.inputs.apiGitHash || env.API_GIT_HASH }}"
+
       - name: Deploy to AWS
-        run: API_GIT_HASH=${{ github.event.inputs.apiGitHash }} INDEXER_GIT_HASH=${{ github.event.inputs.indexerGitHash }} yarn deploy --require-approval never
+        run: yarn deploy --require-approval never
+        env:
+          INDEXER_GIT_HASH: ${{ github.event.inputs.indexerGitHash || env.INDEXER_GIT_HASH }}
+          API_GIT_HASH: ${{ github.event.inputs.apiGitHash || env.API_GIT_HASH }}

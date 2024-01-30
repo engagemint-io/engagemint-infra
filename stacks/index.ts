@@ -2,9 +2,14 @@ import {aws_dynamodb as dynamodb, Duration, Stack, StackProps} from 'aws-cdk-lib
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as events from 'aws-cdk-lib/aws-events';
+import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
+import * as apigatewayv2integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import { aws_s3 as s3 } from 'aws-cdk-lib';
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as route53targets from 'aws-cdk-lib/aws-route53-targets';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 
 class EngageMintStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
@@ -72,7 +77,7 @@ class EngageMintStack extends Stack {
         }));
 
         // Define the Lambda function
-        const lambdaFunction = new lambda.Function(this, 'IndexerFunction', {
+        const lambdaFunction = new lambda.Function(this, 'EngageMintIndexerFunction', {
             runtime: lambda.Runtime.NODEJS_18_X,
             functionName: 'engagemint-indexer',
             code: lambda.Code.fromBucket(bucket, `infra/indexer/${process.env.INDEXER_GIT_HASH}.zip`),
@@ -90,6 +95,72 @@ class EngageMintStack extends Stack {
             ruleName: 'engagemint-indexer-rule',
             targets: [new targets.LambdaFunction(lambdaFunction)],
         });
+
+        //MARK: HTTP API Gateway V2
+
+        // Define the Lambda function for the API
+        const apiLambda = new lambda.Function(this, 'ApiLambdaHandler', {
+            runtime: lambda.Runtime.NODEJS_18_X,
+            functionName: 'engagemint-api-handler',
+            code: lambda.Code.fromBucket(bucket, `infra/api/${process.env.API_GIT_HASH}.zip`),
+            handler: 'buildApi/handler.handler',
+            role: lambdaRole,
+        });
+
+        // Create the HTTP API Gateway
+        const httpApi = new apigatewayv2.HttpApi(this, 'EngageMintHttpApi', {
+            apiName: 'EngageMintHttpApi',
+            description: "HTTP API for EngageMint Service",
+            createDefaultStage: true,
+        });
+
+        // Add a single route to any route with ANY method
+        httpApi.addRoutes({
+            path: '/{proxy+}',
+            methods: [apigatewayv2.HttpMethod.ANY],
+            integration: new apigatewayv2integrations.HttpLambdaIntegration('EngageMintLambdaIntegration', apiLambda),
+        });
+
+        // MARK: DNS Settings
+
+        // Define the domain name
+        const DOMAIN_NAME = 'api.engagemint.io';
+        const HOSTED_ZONE_ID = 'Z027969021D985X3AZJAI';
+
+        const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'EngageMintHostedZone', {
+            hostedZoneId: HOSTED_ZONE_ID,
+            zoneName: 'engagemint.io',
+        });
+
+        // Create a TLS certificate
+        const certificate = new acm.Certificate(this, 'EngageMintApiCertificate', {
+            domainName: DOMAIN_NAME,
+            validation: acm.CertificateValidation.fromDns(hostedZone),
+        });
+
+        // Create a custom domain for the API Gateway
+        const apiDomainName = new apigatewayv2.DomainName(this, 'EngageMintApiDomainName', {
+            domainName: DOMAIN_NAME,
+            certificate: certificate,
+        });
+
+        // Associate the domain name with the HTTP API
+        new apigatewayv2.ApiMapping(this, 'EngageMintApiMapping', {
+            api: httpApi,
+            domainName: apiDomainName,
+            stage: httpApi.defaultStage,
+        });
+
+        // Create a Route 53 A record to point to the API Gateway custom domain
+        new route53.ARecord(this, 'EngageMintApiDomainAliasRecord', {
+            zone: hostedZone,
+            target: route53.RecordTarget.fromAlias(new route53targets.ApiGatewayv2DomainProperties(
+                apiDomainName.regionalDomainName,
+                apiDomainName.regionalHostedZoneId
+            )),
+            recordName: DOMAIN_NAME,
+        });
+
     }
 }
 

@@ -3,8 +3,11 @@ name: Manual Deploy to AWS
 on:
   workflow_dispatch:
     inputs:
-      gitHash:
+      indexerGitHash:
         description: 'engagemint-indexer git commit short hash (e.g. 2e8d24d)'
+        required: true
+      apiGitHash:
+        description: 'engagemint-api git commit short hash (e.g. 2e8d24d)'
         required: true
 
 jobs:
@@ -31,4 +34,4 @@ jobs:
           aws-region: 'us-west-2'
 
       - name: Deploy to AWS
-        run: INDEXER_GIT_HASH=${{ github.event.inputs.gitHash }} yarn deploy --require-approval never
+        run: API_GIT_HASH=${{ github.event.inputs.apiGitHash }} INDEXER_GIT_HASH=${{ github.event.inputs.indexerGitHash }} yarn deploy --require-approval never

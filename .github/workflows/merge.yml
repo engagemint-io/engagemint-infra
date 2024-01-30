@@ -28,5 +28,25 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'us-west-2'
 
+      - name: Get latest commit hash for engagemint-indexer
+        id: get-indexer-hash
+        run: |
+          LATEST_HASH=$(curl -s https://api.github.com/repos/engagemint-io/engagemint-indexer/commits | jq -r '.[0].sha' | cut -c1-7)
+          echo "LATEST_INDEXER_GIT_HASH=${LATEST_HASH}" >> $GITHUB_ENV
+
+      - name: Get latest commit hash for engagemint-api
+        id: get-api-hash
+        run: |
+          LATEST_HASH=$(curl -s https://api.github.com/repos/engagemint-io/engagemint-api/commits | jq -r '.[0].sha' | cut -c1-7)
+          echo "LATEST_API_GIT_HASH=${LATEST_HASH}" >> $GITHUB_ENV
+
+      - name: Print commit hashes used
+        run: |
+          echo "Indexer Commit Hash: ${{ env.LATEST_INDEXER_GIT_HASH }}"
+          echo "API Commit Hash: ${{ env.LATEST_API_GIT_HASH }}"
+
       - name: Deploy to AWS
-        run: yarn deploy
+        run: yarn deploy --require-approval never
+        env:
+          INDEXER_GIT_HASH: ${{ env.LATEST_INDEXER_GIT_HASH }}
+          API_GIT_HASH: ${{ env.LATEST_API_GIT_HASH }}

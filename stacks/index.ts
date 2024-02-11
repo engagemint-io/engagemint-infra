@@ -77,11 +77,15 @@ class EngageMintStack extends Stack {
 					'dynamodb:CreateItem',
 					'dynamodb:UpdateItem',
 					'dynamodb:DeleteItem',
-					'dynamodb:BatchWriteItem',
+					'dynamodb:BatchWriteItem'
+				],
+				resources: [
+					registeredUsersTable.tableArn,
+					epochLeaderboardTable.tableArn,
+					projectConfigurationTable.tableArn,
 					// Explicitly allow querying the GSI for the epochLeaderboardTable
 					`${epochLeaderboardTable.tableArn}/index/UserAccountIdIndex`
-				],
-				resources: [registeredUsersTable.tableArn, epochLeaderboardTable.tableArn, projectConfigurationTable.tableArn]
+				]
 			})
 		);
 

@@ -112,6 +112,11 @@ class EngageMintStack extends Stack {
             apiName: 'EngageMintHttpApi',
             description: "HTTP API for EngageMint Service",
             createDefaultStage: true,
+            corsPreflight: {
+                allowOrigins: ['*'],
+                allowMethods: [apigatewayv2.CorsHttpMethod.ANY],
+                allowHeaders: ['*'],
+            },
         });
 
         // Add a single route to any route with ANY method

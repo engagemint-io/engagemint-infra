@@ -66,7 +66,7 @@ class EngageMintStack extends Stack {
 
         // Attach the DynamoDB access policy to the role
         lambdaRole.addToPolicy(new iam.PolicyStatement({
-            actions: ['dynamodb:Query', 'dynamodb:Scan', 'dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:DescribeTable', 'dynamodb:CreateItem', 'dynamodb:UpdateItem', 'dynamodb:DeleteItem', 'dynamodb:BatchWriteItem'],
+            actions: ['dynamodb:Query', 'dynamodb:Scan', 'dynamodb:Query', 'dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:DescribeTable', 'dynamodb:CreateItem', 'dynamodb:UpdateItem', 'dynamodb:DeleteItem', 'dynamodb:BatchWriteItem'],
             resources: [registeredUsersTable.tableArn, epochLeaderboardTable.tableArn, projectConfigurationTable.tableArn],
         }));
 
@@ -112,11 +112,6 @@ class EngageMintStack extends Stack {
             apiName: 'EngageMintHttpApi',
             description: "HTTP API for EngageMint Service",
             createDefaultStage: true,
-            corsPreflight: {
-                allowOrigins: ['*'],
-                allowMethods: [apigatewayv2.CorsHttpMethod.ANY],
-                allowHeaders: ['*'],
-            },
         });
 
         // Add a single route to any route with ANY method
